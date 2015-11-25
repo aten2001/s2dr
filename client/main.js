@@ -120,10 +120,10 @@ program
 const rl = readline.createInterface(process.stdin, process.stdout);
 rl.setPrompt('s2dr> ');
 rl.prompt();
-rl.on('line', function(line) {
+rl.on('line', (line) => {
   program.parse([null, null].concat(line.trim().split(' ')));
   rl.prompt();
-}).on('close', function() {
+}).on('close', () => {
   terminateSession();
   console.log('Have a great day!'.green);
   process.exit(0);
