@@ -2,7 +2,7 @@ import program from 'commander';
 import readline from 'readline';
 import colors from 'colors';
 
-import initKeys from './commands/init-keys';
+import initWorkspace from './commands/init-workspace';
 import initSession from './commands/init-session';
 import checkOut from './commands/check-out';
 import checkIn from './commands/check-in';
@@ -10,15 +10,18 @@ import delegate from './commands/delegate';
 import safeDelete from './commands/safe-delete';
 import terminateSession from './commands/terminate-session';
 
+let activeWorkspace = null;
+
 program
-  .command('init-keys [username]')
-  .description('generates a new pair of keys for communication with the server')
+  .command('init-workspace [username]')
+  .description('creates a new workspace and generates keys')
   .action((username) => {
     if (!username) {
       missingArg('username');
       return;
     }
-    initKeys(username);
+    initWorkspace(username);
+    activeWorkspace = username;
   });
 
 program
@@ -29,7 +32,7 @@ program
       missingArg('hostname');
       return;
     }
-    initSession(hostname);
+    initSession(activeWorkspace, hostname);
   });
 
 program
@@ -101,7 +104,7 @@ program
     console.log('Commands:');
     console.log('');
     console.log('  Name: \t\tArguments:\t\tDescription:'.green);
-    console.log('  init-keys\t\t<username>\t\tgenerates a new pair of keys for communication with the server');
+    console.log('  init-workspace\t\<username>\t\tcreates a new workspace and generates keys');
     console.log('  init-session\t\t<hostname>\t\tstarts a new secure session, keys must be initialized');
     console.log('  check-out\t\t<filename>\t\tcheck out the file from the server');
     console.log('  check-in\t\t<filename>\t\tsends the file to the server');

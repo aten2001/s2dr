@@ -1,24 +1,33 @@
 import fs from 'fs';
 import https from 'https';
 import path from 'path';
-//import openssl from 'openssl-wrapper';
+import {printError} from '../print';
+import url from 'url';
 
-export default function initSession(hostname) {
-  console.log(hostname);
+export default function initSession(activeWorkspace, hostname) {
+  if (!activeWorkspace) {
+    printError('You have to call init-workspace first!');
+    return;
+  }
 
-  var options = {
-    hostname: 'localhost',
-    port: 4433,
+  const options = {
+    hostname: url.parse(hostname).hostname,
+    port: url.parse(hostname).port,
     path: '/',
     method: 'GET',
+    key: fs.readFileSync(path.join(__dirname, '../../workspaces', activeWorkspace, '.ssl/key.pem')),
+    cert: fs.readFileSync(path.join(__dirname, '../../workspaces', activeWorkspace, '.ssl/crt.pem')),
     ca: fs.readFileSync(path.join(__dirname, '../../ca/ca-crt.pem'))
   };
 
-  var req = https.request(options, (res) => {
-    res.on('data', function(data) {
+  https.request(options, (res) => {
+    res.on('data', (data) => {
       process.stdout.write(data);
     });
-  });
-
-  req.end();
+  })
+  .on('error', function(e) {
+    printError(e);
+    return;
+  })
+  .end();
 }

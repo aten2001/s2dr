@@ -35,6 +35,21 @@ Get help in the client via
 s2dr> help
 ```
 
+## Client Usage
+
+All commands must be ran from the project root.
+
+First you **have to always call `init-workspace USERNAME`**. If the `USERNAME` was never used, it creates a new workspace, generates new keys and signs the public key by CA. If the `USERNAME` was already used (the `workspaces/USERNAME` exists), it just tells the program that you want to use this particular workspace.
+
+Then you have to call `init-session HOSTNAME` to start a secure channel.
+
+Code:
+```
+node client/index
+s2dr> init-workspace USERNAME
+s2dr> init-session https://localhost:4433
+```
+
 ## Some reading...
 
 [https://engineering.circle.com/https-authorized-certs-with-node-js/](https://engineering.circle.com/https-authorized-certs-with-node-js/)
