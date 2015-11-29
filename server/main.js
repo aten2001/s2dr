@@ -5,6 +5,12 @@ import compression from 'compression';
 import bodyParser from 'body-parser';
 import express from 'express';
 
+import checkIn from './routes/check-in';
+import checkOut from './routes/check-out';
+import delegate from './routes/delegate';
+import initSession from './routes/init-session';
+import safeDelete from './routes/safe-delete';
+
 const app = express();
 const router = express.Router();
 
@@ -12,14 +18,20 @@ app.use(compression());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
+// to see what is going on (all incoming requests)
+router.use((req, res, next) => {
+  console.log(new Date() + `${req.connection.remoteAddress} ${req.socket.getPeerCertificate().subject.CN} ${req.method} ${req.url}`);
+  next();
+});
+
 router.route('/init')
-  .get((req, res) => {
-    console.log(new Date() + ' ' +
-    req.connection.remoteAddress + ' ' +
-    req.socket.getPeerCertificate().subject.CN + ' ' +
-    req.method + ' ' + req.url);
-    res.json({message: `Welcome ${req.socket.getPeerCertificate().subject.CN}!`});
-  });
+  .get(initSession);
+
+router.route('/document')
+  .get(checkOut)
+  .post(checkIn)
+  .delete(safeDelete)
+  .put(delegate);
 
 router.route('*')
   .all((req, res) => {

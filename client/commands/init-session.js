@@ -10,7 +10,7 @@ export default function initSession(activeWorkspace, hostname) {
 
   get(activeWorkspace, hostname, '/init')
     .then((data) => {
-      console.log(data);
+      console.log(JSON.parse(data).message);
     })
     .catch((err) => {
       printError(err);
