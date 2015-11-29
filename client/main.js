@@ -11,6 +11,7 @@ import safeDelete from './commands/safe-delete';
 import terminateSession from './commands/terminate-session';
 
 let activeWorkspace = null;
+let hostname = null;
 
 program
   .command('init-workspace [username]')
@@ -29,11 +30,12 @@ program
   .command('init-session [hostname]')
   .alias('is')
   .description('starts a new secure session, keys must be initialized')
-  .action((hostname) => {
-    if (!hostname) {
+  .action((_hostname) => {
+    hostname = _hostname;
+    if (!_hostname) {
       //missingArg('hostname');
       //return;
-      hostname = 'https://localhost:4433'; // to make testing faster for developing
+      hostname = 'https://localhost:4433/'; // to make testing faster for developing
     }
     initSession(activeWorkspace, hostname);
   });

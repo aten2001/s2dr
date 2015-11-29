@@ -1,7 +1,6 @@
-import fs from 'fs';
-import path from 'path';
 import {printError} from '../print';
-import rp from 'request-promise';
+import {get} from '../request';
+
 
 export default function initSession(activeWorkspace, hostname) {
   if (!activeWorkspace) {
@@ -9,20 +8,11 @@ export default function initSession(activeWorkspace, hostname) {
     return;
   }
 
-  const options = {
-    uri: hostname,
-    method: 'GET',
-    key: fs.readFileSync(path.join(__dirname, '../../workspaces', activeWorkspace, '.ssl/key.pem')),
-    cert: fs.readFileSync(path.join(__dirname, '../../workspaces', activeWorkspace, '.ssl/crt.pem')),
-    ca: fs.readFileSync(path.join(__dirname, '../../ca/ca-crt.pem'))
-  };
-
-  rp(options)
+  get(activeWorkspace, hostname)
     .then((data) => {
-      process.stdout.write(data);
+      console.log(data);
     })
-    .catch((e) => {
-      printError(e);
-      return;
+    .catch((err) => {
+      printError(err);
     });
 }
