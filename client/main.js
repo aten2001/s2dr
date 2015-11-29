@@ -14,6 +14,7 @@ let activeWorkspace = null;
 
 program
   .command('init-workspace [username]')
+  .alias('iw')
   .description('creates a new workspace and generates keys')
   .action((username) => {
     if (!username) {
@@ -26,11 +27,13 @@ program
 
 program
   .command('init-session [hostname]')
+  .alias('is')
   .description('starts a new secure session, keys must be initialized')
   .action((hostname) => {
     if (!hostname) {
-      missingArg('hostname');
-      return;
+      //missingArg('hostname');
+      //return;
+      hostname = 'https://localhost:4433'; // to make testing faster for developing
     }
     initSession(activeWorkspace, hostname);
   });

@@ -1,8 +1,7 @@
 import fs from 'fs';
-import https from 'https';
 import path from 'path';
 import {printError} from '../print';
-import url from 'url';
+import rp from 'request-promise';
 
 export default function initSession(activeWorkspace, hostname) {
   if (!activeWorkspace) {
@@ -11,23 +10,19 @@ export default function initSession(activeWorkspace, hostname) {
   }
 
   const options = {
-    hostname: url.parse(hostname).hostname,
-    port: url.parse(hostname).port,
-    path: '/',
+    uri: hostname,
     method: 'GET',
     key: fs.readFileSync(path.join(__dirname, '../../workspaces', activeWorkspace, '.ssl/key.pem')),
     cert: fs.readFileSync(path.join(__dirname, '../../workspaces', activeWorkspace, '.ssl/crt.pem')),
     ca: fs.readFileSync(path.join(__dirname, '../../ca/ca-crt.pem'))
   };
 
-  https.request(options, (res) => {
-    res.on('data', (data) => {
+  rp(options)
+    .then((data) => {
       process.stdout.write(data);
+    })
+    .catch((e) => {
+      printError(e);
+      return;
     });
-  })
-  .on('error', function(e) {
-    printError(e);
-    return;
-  })
-  .end();
 }
