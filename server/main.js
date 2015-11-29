@@ -11,6 +11,13 @@ import delegate from './routes/delegate';
 import initSession from './routes/init-session';
 import safeDelete from './routes/safe-delete';
 
+import storage from 'node-persist';
+storage.initSync();
+
+!storage.getItemSync('users') && storage.setItemSync('users', []);
+!storage.getItemSync('documents') && storage.setItemSync('documents', []);
+!storage.getItemSync('delegations') && storage.setItemSync('delegations', []);
+
 const app = express();
 const router = express.Router();
 

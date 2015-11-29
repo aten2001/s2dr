@@ -93,6 +93,7 @@ program
 
 program
   .command('terminate-session')
+  .alias('ts')
   .description('terminates the secure session')
   .action(() => {
     terminateSession();
@@ -133,8 +134,6 @@ rl.on('line', (line) => {
   rl.prompt();
 }).on('close', () => {
   terminateSession();
-  console.log('Have a great day!'.green);
-  process.exit(0);
 });
 
 function missingArg(argName) {
