@@ -42,6 +42,7 @@ program
 
 program
   .command('check-out [filename]')
+  .alias('co')
   .description('check out the file from the server')
   .action((filename) => {
     if (!filename) {
@@ -53,6 +54,7 @@ program
 
 program
   .command('check-in [filename] [security flag]')
+  .alias('ci')
   .description('sends the file to the server')
   .action((filename, securityFlag) => {
     if (!filename) {
@@ -63,11 +65,12 @@ program
       missingArg('securityFlag');
       return;
     }
-    checkIn(filename, securityFlag);
+    checkIn(activeWorkspace, hostname, filename, securityFlag);
   });
 
 program
   .command('delegate [filename] [client] [time] [propagation flag]')
+  .alias('d')
   .description('delegates permissions to other client')
   .action((filename, client, time, propagationFlag) => {
     const args = {filename: filename, client: client, time: time, propagationFlag: propagationFlag};
@@ -82,6 +85,7 @@ program
 
 program
   .command('safe-delete [filename]')
+  .alias('sd')
   .description('deletes the file from the server')
   .action((filename) => {
     if (!filename) {

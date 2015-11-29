@@ -22,5 +22,4 @@ export default function initSession(req, res) {
     }]));
     res.json({message: `Welcome ${username} for the first time! Secure channel is ready!`});
   }
-
 }
