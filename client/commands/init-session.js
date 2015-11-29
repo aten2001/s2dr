@@ -8,7 +8,7 @@ export default function initSession(activeWorkspace, hostname) {
     return;
   }
 
-  get(activeWorkspace, hostname)
+  get(activeWorkspace, hostname, '/init')
     .then((data) => {
       console.log(data);
     })
