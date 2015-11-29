@@ -5,7 +5,6 @@ Secure Shared Data Repository for CS6238 Secure Computer Systems
 
 - [Node.js](https://nodejs.org/en/) (v4 is required)
 - [Npm](https://www.npmjs.com/) (v3 is required, comes usually with node.js)
-- [MySql](https://www.mysql.com/) (tested with 5.6.24)
 - [OpenSSL](https://www.openssl.org) (v0.9.8zg, preinstalled with OSX/Linux)
 
 ## Installing
