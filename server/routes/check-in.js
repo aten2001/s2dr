@@ -14,13 +14,16 @@ export default function checkIn(req, res) {
     return;
   }
 
+  const filePath = path.join(__dirname, '../documents', req.file.filename);
+  fs.renameSync(filePath, filePath + filename);
   const docs = storage.getItemSync('documents');
   const result = docs.find(doc => doc.id === filename);
   const newFile = {
     id: filename,
-    filename: req.file.filename,
+    filename: req.file.filename + filename,
     ownerId: username,
     securityFlag: req.body.securityFlag,
+    mimetype: req.file.mimetype,
     key: ''
   };
 

@@ -41,15 +41,18 @@ program
   });
 
 program
-  .command('check-out [filename]')
+  .command('check-out [filename] [newname]')
   .alias('co')
   .description('check out the file from the server')
-  .action((filename) => {
+  .action((filename, newname) => {
     if (!filename) {
       missingArg('filename');
       return;
     }
-    checkOut(filename);
+    if (!newname) {
+      newname = filename;
+    }
+    checkOut(activeWorkspace, hostname, filename, newname);
   });
 
 program
@@ -116,7 +119,8 @@ program
     console.log('  Name: \t\tArguments:\t\tDescription:'.green);
     console.log('  init-workspace\t\<username>\t\tcreates a new workspace and generates keys');
     console.log('  init-session\t\t<hostname>\t\tstarts a new secure session, keys must be initialized');
-    console.log('  check-out\t\t<filename>\t\tcheck out the file from the server');
+    console.log('  check-out\t\t<filename>\t\tchecks out the file from the server');
+    console.log('           \t\t[newname]\t\tsaves it as [newname], optional, default is <filename>');
     console.log('  check-in\t\t<filename>\t\tsends the file to the server');
     console.log('          \t\t<security flag>');
     console.log('  delegate\t\t<filename>\t\tdelegates permissions to other client');

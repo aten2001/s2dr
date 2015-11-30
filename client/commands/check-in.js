@@ -26,18 +26,16 @@ export default function checkIn(activeWorkspace, hostname, filename, securityFla
   form.append('securityFlag', securityFlag.toUpperCase());
   form.append('document', fs.createReadStream(filePath));
 
-  post(
+  form.pipe(post(
     activeWorkspace,
     hostname,
     '/document',
-    {securityFlag: securityFlag},
-    form
-  )
-  .then((data) => {
-    console.log(JSON.parse(data).message);
+    null,
+    form.getHeaders()
+  )).then((data) => {
+    console.log(JSON.parse(data.body).message);
   })
   .catch((err) => {
-    printError(err);
+    printError(err.message);
   });
-
 };
