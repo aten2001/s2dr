@@ -5,8 +5,8 @@ import {post} from '../request';
 import FormData from 'form-data';
 
 export default function checkIn(activeWorkspace, hostname, filename, securityFlag) {
-  if (!activeWorkspace) {
-    printError('You have to call init-workspace first!');
+  if (!hostname) {
+    printError('You have to call init-session first!');
     return;
   }
 
@@ -26,7 +26,7 @@ export default function checkIn(activeWorkspace, hostname, filename, securityFla
   form.append('securityFlag', securityFlag.toUpperCase());
   form.append('document', fs.createReadStream(filePath));
 
-  form.pipe(post(
+  return form.pipe(post(
     activeWorkspace,
     hostname,
     '/document',

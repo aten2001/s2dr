@@ -1,6 +1,7 @@
 import program from 'commander';
 import readline from 'readline';
 import colors from 'colors';
+import exec from 'sync-exec';
 
 import initWorkspace from './commands/init-workspace';
 import initSession from './commands/init-session';
@@ -12,19 +13,8 @@ import terminateSession from './commands/terminate-session';
 
 let activeWorkspace = null;
 let hostname = null;
-
-program
-  .command('init-workspace [username]')
-  .alias('iw')
-  .description('creates a new workspace and generates keys')
-  .action((username) => {
-    if (!username) {
-      missingArg('username');
-      return;
-    }
-    initWorkspace(username);
-    activeWorkspace = username;
-  });
+let stdLine = null;
+let rl = null;
 
 program
   .command('init-session [hostname]')
@@ -37,7 +27,7 @@ program
       //return;
       hostname = 'https://localhost:4433'; // to make testing faster for developing
     }
-    initSession(activeWorkspace, hostname);
+    initSession(activeWorkspace, hostname).then(() => rl.prompt());
   });
 
 program
@@ -52,7 +42,7 @@ program
     if (!newname) {
       newname = filename;
     }
-    checkOut(activeWorkspace, hostname, filename, newname);
+    checkOut(activeWorkspace, hostname, filename, newname).then(() => rl.prompt());
   });
 
 program
@@ -68,7 +58,7 @@ program
       missingArg('securityFlag');
       return;
     }
-    checkIn(activeWorkspace, hostname, filename, securityFlag);
+    checkIn(activeWorkspace, hostname, filename, securityFlag).then(() => rl.prompt());
   });
 
 program
@@ -108,7 +98,16 @@ program
 
 program
   .command('*')
-  .action((env) => env && console.log(`\n  error: Unknown command. Try 'help' for all available commands.\n`.red));
+  .action((env) => {
+    if (!activeWorkspace) {
+      env && console.log(`Unknown command ${env}. Try 'help' for all available commands.`.red);
+    } else {
+      let res = exec(stdLine, {cwd: `workspaces/${activeWorkspace}`});
+      res.stdout && console.log(res.stdout);
+      res.stderr && console.log(res.stderr.red);
+    }
+  });
+
 
 program
   .command('help')
@@ -117,7 +116,6 @@ program
     console.log('Commands:');
     console.log('');
     console.log('  Name: \t\tArguments:\t\tDescription:'.green);
-    console.log('  init-workspace\t\<username>\t\tcreates a new workspace and generates keys');
     console.log('  init-session\t\t<hostname>\t\tstarts a new secure session, keys must be initialized');
     console.log('  check-out\t\t<filename>\t\tchecks out the file from the server');
     console.log('           \t\t[newname]\t\tsaves it as [newname], optional, default is <filename>');
@@ -134,18 +132,29 @@ program
   });
 
 // main program loop, reading and parsing stdin input
-const rl = readline.createInterface(process.stdin, process.stdout);
-rl.setPrompt('s2dr> ');
-rl.prompt();
-rl.on('line', (line) => {
-  program.parse([null, null].concat(line.trim().split(' ')));
+rl = readline.createInterface(process.stdin, process.stdout);
+rl.question('What is your username (workspace)? '.green, (answer) => {
+  if (!answer) {
+    console.log(`error: You can't leave username empty.`.red);
+    return;
+  }
+  initWorkspace(answer);
+  activeWorkspace = answer;
+
+  rl.setPrompt(`s2dr:${activeWorkspace}> `);
   rl.prompt();
-}).on('close', () => {
-  terminateSession();
+  rl.on('line', (line) => {
+    stdLine = line;
+    program.parse([null, null].concat(line.trim().split(' ')));
+  }).on('close', () => {
+    terminateSession();
+  });
+
 });
 
+
 function missingArg(argName) {
-  console.log(`\n  error: missing required argument `.red + `${argName}\n`.underline.red);
+  console.log(`Missing required argument `.red + `${argName}`.underline.red);
 }
 
 colors.red;

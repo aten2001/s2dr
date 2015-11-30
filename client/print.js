@@ -1,9 +1,9 @@
 import colors from 'colors';
 
 export function printError(msg) {
-  console.log(`\n  error: ${msg} \n`.red);
+  console.log(`${msg}`.red);
 }
 
 export function printInfo(msg) {
-  console.log(`\n  info: ${msg} \n`.green);
+  console.log(`${msg}`.green);
 }
