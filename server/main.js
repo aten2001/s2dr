@@ -5,6 +5,7 @@ import compression from 'compression';
 import bodyParser from 'body-parser';
 import express from 'express';
 import multer from 'multer';
+import exec from 'sync-exec';
 
 import checkIn from './routes/check-in';
 import checkOut from './routes/check-out';
@@ -18,6 +19,8 @@ storage.initSync({dir: path.join(__dirname, 'persist')});
 !storage.getItemSync('users') && storage.setItemSync('users', []);
 !storage.getItemSync('documents') && storage.setItemSync('documents', []);
 !storage.getItemSync('delegations') && storage.setItemSync('delegations', []);
+
+exec(`mkdir server/documents`);
 
 const app = express();
 const router = express.Router();

@@ -17,6 +17,17 @@ export default function checkOut(req, res) {
       res.sendFile(filePath, () => {
         fs.unlinkSync(filePath);
       });
+    } else if (result.securityFlag === 'INTEGRITY') {
+      const filePath = path.join(__dirname, '../documents', result.filename);
+      const hashFile = parseHash(exec(`openssl dgst -sha256 ${filePath}`));
+      const hashSign = parseHash(exec(`openssl rsautl -verify -inkey server/ssl/server-key.pem -keyform PEM -in ${filePath}.signature`));
+      if (hashFile === hashSign) {
+        res.sendFile(filePath);
+      } else {
+        res.status(400).json({
+          message: `Document ${documentId} lost its integrity.`
+        });
+      }
     } else {
       const filePath = path.join(__dirname, '../documents', result.filename);
       res.sendFile(filePath);
@@ -26,4 +37,8 @@ export default function checkOut(req, res) {
       message: `Document ${documentId} doesn't exist or you don't have right to check it out.`
     });
   }
+}
+
+function parseHash(output) {
+  return output.stdout.split('= ')[1];
 }

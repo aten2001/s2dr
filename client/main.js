@@ -24,6 +24,7 @@ program
     hostname = _hostname;
     if (!_hostname) {
       //missingArg('hostname');
+      //rl.prompt();
       //return;
       hostname = 'https://localhost:4433'; // to make testing faster for developing
     }
@@ -37,6 +38,7 @@ program
   .action((filename, newname) => {
     if (!filename) {
       missingArg('filename');
+      rl.prompt();
       return;
     }
     if (!newname) {
@@ -52,10 +54,12 @@ program
   .action((filename, securityFlag) => {
     if (!filename) {
       missingArg('filename');
+      rl.prompt();
       return;
     }
     if (!securityFlag) {
       missingArg('securityFlag');
+      rl.prompt();
       return;
     }
     checkIn(activeWorkspace, hostname, filename, securityFlag).then(() => rl.prompt());
@@ -70,6 +74,7 @@ program
     for (let arg in args) {
       if (!args[arg]) {
         missingArg(arg);
+        rl.prompt();
         return;
       }
     }
@@ -83,6 +88,7 @@ program
   .action((filename) => {
     if (!filename) {
       missingArg('filename');
+      rl.prompt();
       return;
     }
     safeDelete(filename);
@@ -106,8 +112,8 @@ program
       res.stdout && console.log(res.stdout);
       res.stderr && console.log(res.stderr.red);
     }
+    rl.prompt();
   });
-
 
 program
   .command('help')
@@ -129,6 +135,7 @@ program
     console.log('  terminate-session\t\t\t\tterminates the secure session');
     console.log('  help\t\t\t\t\t\tdisplays this help');
     console.log('');
+    rl.prompt();
   });
 
 // main program loop, reading and parsing stdin input

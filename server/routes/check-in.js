@@ -17,6 +17,12 @@ export default function checkIn(req, res) {
 
   const key = genKey();
   const filePath = path.join(__dirname, '../documents', req.file.filename);
+
+  if (req.body.securityFlag.toUpperCase() === 'INTEGRITY') {
+    exec(`openssl dgst -sha256 ${filePath} > server/documents/${req.file.filename}_hash`);
+    console.log(exec(`openssl rsautl -sign -inkey server/ssl/server-key.pem -keyform PEM -in server/documents/${req.file.filename}_hash > server/documents/${req.file.filename}${filename}.signature`));
+    exec(`rm server/documents/${req.file.filename}_hash`);
+  }
   if (req.body.securityFlag.toUpperCase() === 'CONFIDENTIALITY') {
     exec(`openssl enc -in ${filePath} -out ${filePath}${filename}.aes -e -aes256 -k ${key}`);
     fs.unlinkSync(filePath);
