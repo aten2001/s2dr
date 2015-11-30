@@ -29,5 +29,4 @@ export default function checkOut(activeWorkspace, hostname, filename, newname) {
   .catch((err) => {
     printError(err.message);
   });
-
 }

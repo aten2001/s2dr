@@ -22,7 +22,7 @@ storage.initSync({dir: path.join(__dirname, 'persist')});
 const app = express();
 const router = express.Router();
 
-//app.use(compression());
+app.use(compression());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
