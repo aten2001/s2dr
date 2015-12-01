@@ -28,55 +28,50 @@ export default function delegate(req, res) {
     return;
   }
 
-  let delegation = null;
   // check if this request comes from the file owner
   if (docs.some(doc => doc.id === filename && doc.ownerId === username)) {
-    delegation = {time: 'inf', permission: 'both', propagationFlag: 'true'};
-  }
-  // find delegation for me
-  if (!delegation) {
-    delegation = delegations.find(d => d.documentId === filename && d.userId === username && d.propagationFlag);
-  }
-  // if there is none, try to find general one
-  if (!delegation) {
-    delegation = delegations.find(d => d.documentId === filename && d.userId === 'ALL' && d.propagationFlag);
-  }
-
-  // still no delegation for me? that's the end
-  if (!delegation) {
-    res.status(400).json({message: `You don't have permissions to delegate ${filename}.`});
+    createDelegation(req, res, delegations, filename, permission, 'inf');
     return;
   }
 
-  // check the propagationFlag
-  if (delegation.propagationFlag === 'false') {
-    res.status(400).json({message: `You can't delegate to the file ${filename} because propagationFlag is false`});
+  // find all matching delegations and sort them by the time
+  const match = delegations.filter(d => d.documentId === filename &&
+                                        (d.userId === username || d.userId === 'ALL') &&
+                                        (d.permission === 'both' || d.permission === permission) &&
+                                        (moment(d.time) > moment()) &&
+                                        d.propagationFlag)
+                           .sort((d1, d2) => {
+                             if (moment(d1.time) > moment(d2.time)) return 1;
+                             if (moment(d1.time) < moment(d2.time)) return -1;
+                             return 0;
+                           });
+
+  if (match.length === 0) {
+    res.status(400).json({message: `You can't make this delegation for the file ${filename}.`});
     return;
   }
 
-  // check if requested permissions can be delegated
-  if (delegation.permission !== 'both' && permission !== delegation.permission) {
-    res.status(400).json({message: `You can't delegate the permission ${permission} to the file ${filename}.`});
-    return;
-  }
+  createDelegation(req, res, delegations, filename, permission, match[0].time);
+}
 
+function createDelegation(req, res, delegations, filename, permission, maxTime) {
   // yay, all checks passed, let's fcreate a new delegation
   let setTime = moment().add(parseInt(req.body.time, 10), 's').format();
-  if (delegation.time !== 'inf' && moment(setTime) > moment(delegation.time)) {
-    setTime = delegation.time;
+  if (maxTime !== 'inf' && moment(setTime) > moment(maxTime)) {
+    setTime = maxTime;
   }
+
   storage.setItemSync('delegations', delegations
-    .filter(d => d.documentId !== filename && d.userId !== req.body.client)
-    .concat({
+    .filter(d => d.documentId !== filename || d.userId !== req.body.client || d.permission !== permission)
+    .concat([{
       documentId: filename,
       userId: req.body.client,
       permission: permission,
       time: setTime,
       propagationFlag: req.body.propagationFlag === 'false' ? false : true
-    })
+    }])
   );
   res.json({
-    message: `Document ${filename} was delegated to user ${req.body.client} with permission ${permission}
-              until ${setTime} and propagationFlag set to ${req.body.propagationFlag}!`
+    message: `Document ${filename} was delegated to user ${req.body.client} with permission ${permission} until ${setTime} and propagationFlag set to ${req.body.propagationFlag}!`
   });
 }
