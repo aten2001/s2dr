@@ -23,7 +23,7 @@ export default function delegate(req, res) {
   }
 
   // check if the client exists
-  if (!users.some(user => user.id === req.body.client)) {
+  if (!users.some(user => user.id === req.body.client || req.body.client === 'ALL')) {
     res.status(400).json({message: `User ${req.body.client} doesn't exist.`});
     return;
   }

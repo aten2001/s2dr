@@ -3,6 +3,7 @@ import path from 'path';
 import storage from 'node-persist';
 import sanitize from 'sanitize-filename';
 import exec from 'sync-exec';
+import isAllowed from '../is-allowed';
 
 export default function checkIn(req, res) {
   const filename = sanitize(req.file.originalname);
@@ -17,6 +18,15 @@ export default function checkIn(req, res) {
 
   const key = genKey();
   const filePath = path.join(__dirname, '../documents', req.file.filename);
+
+  if (storage.getItemSync('documents').some(doc => doc.id === filename) &&
+      !isAllowed(username, filename, 'checking-in')) {
+    fs.unlinkSync(filePath);
+    res.status(400).json({
+      message: `This file already exists on the server and you don't have checking-in permission.`
+    });
+    return;
+  }
 
   if (req.body.securityFlag.toUpperCase() === 'INTEGRITY') {
     exec(`openssl dgst -sha256 ${filePath} > server/documents/${req.file.filename}_hash`);

@@ -3,12 +3,21 @@ import storage from 'node-persist';
 import sanitize from 'sanitize-filename';
 import exec from 'sync-exec';
 import fs from 'fs';
+import isAllowed from '../is-allowed';
 
 export default function checkOut(req, res) {
   const username = sanitize(req.socket.getPeerCertificate().subject.CN);
   const documentId = sanitize(req.query.documentId);
   const docs = storage.getItemSync('documents');
-  const result = docs.find(doc => doc.id === documentId && doc.ownerId === username);
+
+  if (!isAllowed(username, documentId, 'checking-out')) {
+    res.status(400).json({
+      message: `You don't have checking-out permission.`
+    });
+    return;
+  }
+
+  const result = docs.find(doc => doc.id === documentId);
   if (result) {
     res.type(result.mimetype);
     if (result.securityFlag === 'CONFIDENTIALITY') {
