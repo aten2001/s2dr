@@ -3,8 +3,6 @@ import sanitize from 'sanitize-filename';
 import moment from 'moment';
 
 export default function delegate(req, res) {
-  console.log(req.body);
-
   const filename = sanitize(req.body.filename);
   const username = sanitize(req.socket.getPeerCertificate().subject.CN);
 
@@ -33,7 +31,7 @@ export default function delegate(req, res) {
   let delegation = null;
   // check if this request comes from the file owner
   if (docs.some(doc => doc.id === filename && doc.ownerId === username)) {
-    delegation = {time: 'inf', permission: 'both'};
+    delegation = {time: 'inf', permission: 'both', propagationFlag: 'true'};
   }
   // find delegation for me
   if (!delegation) {
@@ -51,12 +49,18 @@ export default function delegate(req, res) {
   }
 
   // check the propagationFlag
-  if (permission !== 'both' && permission !== delegation.permission) {
+  if (delegation.propagationFlag === 'false') {
+    res.status(400).json({message: `You can't delegate to the file ${filename} because propagationFlag is false`});
+    return;
+  }
+
+  // check if requested permissions can be delegated
+  if (delegation.permission !== 'both' && permission !== delegation.permission) {
     res.status(400).json({message: `You can't delegate the permission ${permission} to the file ${filename}.`});
     return;
   }
 
-  // yay, let's we can create a new delegation
+  // yay, all checks passed, let's fcreate a new delegation
   let setTime = moment().add(parseInt(req.body.time, 10), 's').format();
   if (delegation.time !== 'inf' && moment(setTime) > moment(delegation.time)) {
     setTime = delegation.time;
