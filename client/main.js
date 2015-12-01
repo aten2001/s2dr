@@ -66,11 +66,11 @@ program
   });
 
 program
-  .command('delegate [filename] [client] [time] [propagation flag]')
+  .command('delegate [filename] [client] [time] [permission] [propagation flag]')
   .alias('d')
   .description('delegates permissions to other client')
-  .action((filename, client, time, propagationFlag) => {
-    const args = {filename: filename, client: client, time: time, propagationFlag: propagationFlag};
+  .action((filename, client, time, permission, propagationFlag) => {
+    const args = {filename: filename, client: client, time: time, permission: permission, propagationFlag: propagationFlag};
     for (let arg in args) {
       if (!args[arg]) {
         missingArg(arg);
@@ -78,7 +78,7 @@ program
         return;
       }
     }
-    delegate(filename, client, time, propagationFlag);
+    delegate(activeWorkspace, hostname, filename, client, time, permission, propagationFlag).then(() => rl.prompt());
   });
 
 program
@@ -126,11 +126,12 @@ program
     console.log('  check-out\t\t<filename>\t\tchecks out the file from the server');
     console.log('           \t\t[newname]\t\tsaves it as [newname], optional, default is <filename>');
     console.log('  check-in\t\t<filename>\t\tsends the file to the server');
-    console.log('          \t\t<security flag>');
+    console.log('          \t\t<security flag>\t\tCONFIDENTIALITY | INTEGRITY | NONE');
     console.log('  delegate\t\t<filename>\t\tdelegates permissions to other client');
-    console.log('          \t\t<client>');
-    console.log('          \t\t<time>');
-    console.log('          \t\t<propagation flag>');
+    console.log('          \t\t<client>\t\tusername | ALL');
+    console.log('          \t\t<time>\t\t\ttime(s)');
+    console.log('          \t\t<permission>\t\tchecking-in | checking-out | both');
+    console.log('          \t\t<propagation flag>\ttrue | false');
     console.log('  safe-delete\t\t<filename>\t\tdeletes the file from the server');
     console.log('  terminate-session\t\t\t\tterminates the secure session');
     console.log('  help\t\t\t\t\t\tdisplays this help');

@@ -11,7 +11,7 @@ export function post(activeWorkspace, hostname, route = '', json = null, headers
 }
 
 export function put(activeWorkspace, hostname, route = '', json = null) {
-  //return request(activeWorkspace, hostname, route, json, 'PUT');
+  return rp(getOptions(activeWorkspace, hostname, route, 'PUT', null, json));
 }
 
 export function remove(activeWorkspace, hostname, route = '', json = null) {
@@ -34,8 +34,7 @@ function getOptions(activeWorkspace, hostname, route, method, qs = null, body = 
       return encodeURIComponent(k) + '=' + encodeURIComponent(qs[k]);
     }).join('&');
   }
-
-  if (body) options.body = JSON.stringify(body);
+  if (body) options.form = body;
   if (headers) options.headers = headers;
   return options;
 }

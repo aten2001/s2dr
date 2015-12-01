@@ -44,8 +44,10 @@ router.route('/init')
 router.route('/document')
   .get(checkOut)
   .post(checkIn)
-  .delete(safeDelete)
-  .put(delegate);
+  .delete(safeDelete);
+
+router.route('/delegation')
+  .post(delegate);
 
 router.route('*')
   .all((req, res) => {
