@@ -2,6 +2,8 @@ import program from 'commander';
 import readline from 'readline';
 import colors from 'colors';
 import exec from 'sync-exec';
+import fs from 'fs';
+import path from 'path';
 
 import initWorkspace from './commands/init-workspace';
 import initSession from './commands/init-session';
@@ -11,10 +13,26 @@ import delegate from './commands/delegate';
 import safeDelete from './commands/safe-delete';
 import terminateSession from './commands/terminate-session';
 
+// client app state
 let activeWorkspace = null;
 let hostname = null;
 let stdLine = null;
 let rl = null;
+let modifiedFiles = [];
+
+// watching over files and keep a list of modifications
+function updateWatchList(filename) {
+  modifiedFiles = modifiedFiles.filter(file => file !== filename);
+  fs.watch(path.join(__dirname, `../workspaces/${activeWorkspace}`, filename), (event, _filename) => {
+    if (event === 'rename') {
+      modifiedFiles = modifiedFiles.filter(file => file !== filename);
+      return;
+    }
+    if (event === 'change' && !modifiedFiles.some(f => f === _filename)) {
+      modifiedFiles = modifiedFiles.concat(_filename);
+    }
+  });
+}
 
 program
   .command('init-session [hostname]')
@@ -44,7 +62,7 @@ program
     if (!newname) {
       newname = filename;
     }
-    checkOut(activeWorkspace, hostname, filename, newname).then(() => rl.prompt());
+    checkOut(activeWorkspace, hostname, filename, newname, updateWatchList).then(() => rl.prompt());
   });
 
 program
@@ -62,7 +80,7 @@ program
       rl.prompt();
       return;
     }
-    checkIn(activeWorkspace, hostname, filename, securityFlag).then(() => rl.prompt());
+    checkIn(activeWorkspace, hostname, filename, securityFlag, updateWatchList).then(() => rl.prompt());
   });
 
 program
@@ -91,7 +109,7 @@ program
       rl.prompt();
       return;
     }
-    safeDelete(filename);
+    safeDelete(activeWorkspace, hostname, filename).then(() => rl.prompt());
   });
 
 program
@@ -99,7 +117,7 @@ program
   .alias('ts')
   .description('terminates the secure session')
   .action(() => {
-    terminateSession();
+    terminateSession(activeWorkspace, hostname, modifiedFiles);
   });
 
 program
@@ -117,24 +135,25 @@ program
 
 program
   .command('help')
+  .alias('h')
   .action(() => {
     console.log('');
     console.log('Commands:');
     console.log('');
-    console.log('  Name: \t\tArguments:\t\tDescription:'.green);
-    console.log('  init-session\t\t<hostname>\t\tstarts a new secure session, keys must be initialized');
-    console.log('  check-out\t\t<filename>\t\tchecks out the file from the server');
-    console.log('           \t\t[newname]\t\tsaves it as [newname], optional, default is <filename>');
-    console.log('  check-in\t\t<filename>\t\tsends the file to the server');
-    console.log('          \t\t<security flag>\t\tCONFIDENTIALITY | INTEGRITY | NONE');
-    console.log('  delegate\t\t<filename>\t\tdelegates permissions to other client');
-    console.log('          \t\t<client>\t\tusername | ALL');
-    console.log('          \t\t<time>\t\t\ttime(s)');
-    console.log('          \t\t<permission>\t\tchecking-in | checking-out | both');
-    console.log('          \t\t<propagation flag>\ttrue | false');
-    console.log('  safe-delete\t\t<filename>\t\tdeletes the file from the server');
-    console.log('  terminate-session\t\t\t\tterminates the secure session');
-    console.log('  help\t\t\t\t\t\tdisplays this help');
+    console.log('  Command: \t\tAlias:\t\tArguments:\t\tDescription:'.green);
+    console.log('  init-session\t\tis\t\t<hostname>\t\tstarts a new secure session, keys must be initialized');
+    console.log('  check-out\t\tco\t\t<filename>\t\tchecks out the file from the server');
+    console.log('           \t\t\t\t[newname]\t\tsaves it as [newname], optional, default is <filename>');
+    console.log('  check-in\t\tci\t\t<filename>\t\tsends the file to the server');
+    console.log('          \t\t\t\t<security flag>\t\tCONFIDENTIALITY | INTEGRITY | NONE');
+    console.log('  delegate\t\td\t\t<filename>\t\tdelegates permissions to other client');
+    console.log('          \t\t\t\t<client>\t\tusername | ALL');
+    console.log('          \t\t\t\t<time>\t\t\ttime(s)');
+    console.log('          \t\t\t\t<permission>\t\tchecking-in | checking-out | both');
+    console.log('          \t\t\t\t<propagation flag>\ttrue | false');
+    console.log('  safe-delete\t\tsd\t\t<filename>\t\tdeletes the file from the server');
+    console.log('  terminate-session\tts\t\t\t\t\tterminates the secure session');
+    console.log('  help\t\t\th\t\t\t\t\tdisplays this help');
     console.log('');
     rl.prompt();
   });
@@ -155,7 +174,7 @@ rl.question('What is your username (workspace)? '.green, (answer) => {
     stdLine = line;
     program.parse([null, null].concat(line.trim().split(' ')));
   }).on('close', () => {
-    terminateSession();
+    terminateSession(activeWorkspace, hostname, modifiedFiles);
   });
 
 });

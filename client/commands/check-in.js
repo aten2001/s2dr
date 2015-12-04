@@ -5,14 +5,14 @@ import {post} from '../request';
 import FormData from 'form-data';
 import Bluebird from 'bluebird';
 
-export default function checkIn(activeWorkspace, hostname, filename, securityFlag) {
+export default function checkIn(activeWorkspace, hostname, filename, securityFlag, updateWatchList) {
   if (!hostname) {
     printError('You have to call init-session first!');
     return Bluebird.resolve();
   }
 
-  if (['CONFIDENTIALITY', 'INTEGRITY', 'NONE'].indexOf(securityFlag.toUpperCase()) === -1) {
-    printError(`SecurityFlag can be set to CONFIDENTIALITY, INTEGRITY or NONE. Not to ${securityFlag}`);
+  if (['CONFIDENTIALITY', 'INTEGRITY', 'NONE', 'UPDATE'].indexOf(securityFlag.toUpperCase()) === -1) {
+    printError(`SecurityFlag can be set to CONFIDENTIALITY, INTEGRITY or NONE. Not to ${securityFlag}.`);
     return Bluebird.resolve();
   }
 
@@ -35,6 +35,9 @@ export default function checkIn(activeWorkspace, hostname, filename, securityFla
     form.getHeaders()
   )).then((data) => {
     console.log(JSON.parse(data.body).message);
+    if (data.statusCode === 200) {
+      updateWatchList(filename);
+    }
   })
   .catch((err) => {
     printError(err.message);

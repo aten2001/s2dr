@@ -4,7 +4,7 @@ import {get} from '../request';
 import write from 'fs-writefile-promise';
 import Bluebird from 'bluebird';
 
-export default function checkOut(activeWorkspace, hostname, filename, newname) {
+export default function checkOut(activeWorkspace, hostname, filename, newname, updateWatchList) {
   if (!hostname) {
     printError('You have to call init-session first!');
     return Bluebird.resolve();
@@ -18,7 +18,12 @@ export default function checkOut(activeWorkspace, hostname, filename, newname) {
     '/document',
     {documentId: filename}
   )
-  .then((data) => write(filePath, data.body, 'binary'))
+  .then((data) => {
+    if (data.statusCode === 200) {
+      updateWatchList(filename);
+    }
+    write(filePath, data.body, 'binary');
+  })
   .then(() => printInfo(`Document ${filename} was saved to ${filePath}`))
   .catch((err) => {
     printError(err.message);

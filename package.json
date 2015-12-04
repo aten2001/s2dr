@@ -7,6 +7,10 @@
     "type": "git",
     "url": "git@github.com:tajo/s2dr.git"
   },
+  "engines": {
+    "node": "^4.0.0",
+    "npm": "^3.0.0"
+  },
   "main": "index.js",
   "private": true,
   "scripts": {
@@ -19,6 +23,7 @@
     "colors": "^1.1.2",
     "commander": "^2.9.0",
     "compression": "^1.6.0",
+    "continuation-local-storage": "^3.1.4",
     "express": "^4.13.3",
     "form-data": "^0.2.0",
     "fs-writefile-promise": "^1.0.3",
