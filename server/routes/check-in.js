@@ -8,10 +8,19 @@ import isAllowed from '../is-allowed';
 export default function checkIn(req, res) {
   const filename = sanitize(req.file.originalname);
   const username = sanitize(req.socket.getPeerCertificate().subject.CN);
+  let securityFlag = req.body.securityFlag;
 
-  if (['CONFIDENTIALITY', 'INTEGRITY', 'NONE'].indexOf(req.body.securityFlag.toUpperCase()) === -1) {
+  if (securityFlag.toUpperCase() === 'UPDATE') {
+    if (storage.getItemSync('documents').some(doc => doc.id === filename)) {
+      securityFlag = storage.getItemSync('documents').find(doc => doc.id === filename).securityFlag;
+    } else {
+      securityFlag = 'NONE';
+    }
+  }
+
+  if (['CONFIDENTIALITY', 'INTEGRITY', 'NONE'].indexOf(securityFlag.toUpperCase()) === -1) {
     res.status(400).json({
-      message: `SecurityFlag can be set to CONFIDENTIALITY, INTEGRITY or NONE. Not to ${req.body.securityFlag}`
+      message: `SecurityFlag can be set to CONFIDENTIALITY, INTEGRITY or NONE. Not to ${securityFlag}`
     });
     return;
   }
@@ -28,12 +37,12 @@ export default function checkIn(req, res) {
     return;
   }
 
-  if (req.body.securityFlag.toUpperCase() === 'INTEGRITY') {
+  if (securityFlag.toUpperCase() === 'INTEGRITY') {
     exec(`openssl dgst -sha256 ${filePath} > server/documents/${req.file.filename}_hash`);
     exec(`openssl rsautl -sign -inkey server/ssl/server-key.pem -keyform PEM -in server/documents/${req.file.filename}_hash > server/documents/${req.file.filename}${filename}.signature`);
     exec(`rm server/documents/${req.file.filename}_hash`);
   }
-  if (req.body.securityFlag.toUpperCase() === 'CONFIDENTIALITY') {
+  if (securityFlag.toUpperCase() === 'CONFIDENTIALITY') {
     exec(`openssl enc -in ${filePath} -out ${filePath}${filename}.aes -e -aes256 -k ${key}`);
     fs.unlinkSync(filePath);
   } else {
@@ -46,9 +55,9 @@ export default function checkIn(req, res) {
     id: filename,
     filename: req.file.filename + filename,
     ownerId: username,
-    securityFlag: req.body.securityFlag.toUpperCase(),
+    securityFlag: securityFlag.toUpperCase(),
     mimetype: req.file.mimetype,
-    key: req.body.securityFlag.toUpperCase() === 'CONFIDENTIALITY' ? key : ''
+    key: securityFlag.toUpperCase() === 'CONFIDENTIALITY' ? key : ''
   };
 
   if (result) {
