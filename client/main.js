@@ -91,7 +91,7 @@ program
       rl.prompt();
       return;
     }
-    safeDelete(filename);
+    safeDelete(activeWorkspace, hostname, filename).then(() => rl.prompt());
   });
 
 program
