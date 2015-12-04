@@ -30,7 +30,7 @@ export default function checkIn(req, res) {
 
   if (req.body.securityFlag.toUpperCase() === 'INTEGRITY') {
     exec(`openssl dgst -sha256 ${filePath} > server/documents/${req.file.filename}_hash`);
-    console.log(exec(`openssl rsautl -sign -inkey server/ssl/server-key.pem -keyform PEM -in server/documents/${req.file.filename}_hash > server/documents/${req.file.filename}${filename}.signature`));
+    exec(`openssl rsautl -sign -inkey server/ssl/server-key.pem -keyform PEM -in server/documents/${req.file.filename}_hash > server/documents/${req.file.filename}${filename}.signature`);
     exec(`rm server/documents/${req.file.filename}_hash`);
   }
   if (req.body.securityFlag.toUpperCase() === 'CONFIDENTIALITY') {
@@ -46,14 +46,17 @@ export default function checkIn(req, res) {
     id: filename,
     filename: req.file.filename + filename,
     ownerId: username,
-    securityFlag: req.body.securityFlag,
+    securityFlag: req.body.securityFlag.toUpperCase(),
     mimetype: req.file.mimetype,
     key: req.body.securityFlag.toUpperCase() === 'CONFIDENTIALITY' ? key : ''
   };
 
   if (result) {
-    if (req.body.securityFlag.toUpperCase() === 'CONFIDENTIALITY') {
-      fs.unlinkSync(path.join(__dirname, '../documents', result.filename, '.aes'));
+    if (result.securityFlag === 'CONFIDENTIALITY') {
+      fs.unlinkSync(path.join(__dirname, '../documents', result.filename + '.aes'));
+    } else if (result.securityFlag === 'INTEGRITY') {
+      fs.unlinkSync(path.join(__dirname, '../documents', result.filename));
+      fs.unlinkSync(path.join(__dirname, '../documents', result.filename + '.signature'));
     } else {
       fs.unlinkSync(path.join(__dirname, '../documents', result.filename));
     }
