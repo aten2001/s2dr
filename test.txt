@@ -1,0 +1,95 @@
+1. 
+$ nodejs server/index
+Server is running at https://localhost:4433 ...
+
+2.
+$ nodejs client/index
+What is your username (workspace)? client_0
+Workspace client_0 created and selected.
+s2dr:client_0> help
+
+Commands:
+
+  Command: 		Alias:		Arguments:		Description:
+  init-session		is		<hostname>		starts a new secure session, keys must be initialized
+  check-out		co		<filename>		checks out the file from the server
+           				[newname]		saves it as [newname], optional, default is <filename>
+  check-in		ci		<filename>		sends the file to the server
+          				<security flag>		CONFIDENTIALITY | INTEGRITY | NONE
+  delegate		d		<filename>		delegates permissions to other client
+          				<client>		username | ALL
+          				<time>			time(s)
+          				<permission>		checking-in | checking-out | both
+          				<propagation flag>	true | false
+  safe-delete		sd		<filename>		deletes the file from the server
+  terminate-session	ts					terminates the secure session
+  help			h					displays this help
+
+s2dr:client_0> touch 0.txt
+s2dr:client_0> init-session
+Welcome client_0 for the first time! Secure channel is ready!
+s2dr:client_0> check-in 0.txt INTEGRITY
+Document 0.txt was successfully uploaded!
+
+PROBLEM: "Provide a script for verifing the signature of the copy"
+
+3. 
+s2dr:client_0> check-out 0.txt 0_copy.txt
+Document 0.txt was saved to /home/brian/Documents/s2dr/workspaces/client_0/0_copy.txt
+s2dr:client_0> ls
+0_copy.txt
+0.txt
+
+4. 
+$ nodejs client/index
+What is your username (workspace)? client_1
+Workspace client_1 created and selected.
+s2dr:client_1> init-session
+Welcome client_1 for the first time! Secure channel is ready!
+s2dr:client_1> check-out t0.txt 0_copy.txt
+You don't have checking-out permission.
+
+5.
+s2dr:client_0> safe-delete 0.txt
+The document 0.txt was safely deleted!
+s2dr:client_0> check-out 0.txt 0_copy2.txt
+You don't have checking-out permission.
+
+6. 
+s2dr:client_0> touch 1.txt
+s2dr:client_0> check-in 1.txt CONFIDENTIALITY
+Document 1.txt was successfully uploaded!
+s2dr:client_0> check-out 1.txt 1_copy.txt
+Document 1.txt was saved to /home/brian/Documents/s2dr/workspaces/client_0/1_copy.txt
+s2dr:client_0> ls
+0_copy.txt
+0.txt
+1_copy.txt
+1.txt
+s2dr:client_0> terminate-session
+Have a great day!
+
+PROBLEM: "Show where teh server copy of '1.txt' is located"
+
+7. 
+$ nodejs client/index
+What is your username (workspace)? client_0
+Workspace client_0 selected.
+s2dr:client_0> is
+Welcome back client_0! Secure channel is ready!
+s2dr:client_0> ci 1.txt CONFIDENTIALITY INTEGRITY
+Document 1.txt was successfully updated!
+s2dr:client_0> co 1.txt 1_copy2.txt
+Document 1.txt was saved to /home/brian/Documents/s2dr/workspaces/client_0/1_copy2.txt
+
+PROBLEM: "Show where the server copy of '1.txt' and its signature are located"
+
+8. 
+PROBLEM: when both in and out are set the flag is true and only the first (in or out) is applied
+
+9.
+PROBLEM:s2dr:client_2> co 1.txt 1_copy2.txt
+watch /home/brian/Documents/s2dr/workspaces/client_2/1.txt ENOENT
+
+
+ 
