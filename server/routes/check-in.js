@@ -29,7 +29,7 @@ export default function checkIn(req, res) {
   const filePath = path.join(__dirname, '../documents', req.file.filename);
 
   if (storage.getItemSync('documents').some(doc => doc.id === filename) &&
-      !isAllowed(username, filename, 'checking-in')) {
+      !isAllowed(storage.getItemSync('documents'), storage.getItemSync('delegations'), username, filename, 'checking-in')) {
     fs.unlinkSync(filePath);
     res.status(400).json({
       message: `This file already exists on the server and you don't have checking-in permission.`

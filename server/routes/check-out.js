@@ -10,7 +10,7 @@ export default function checkOut(req, res) {
   const documentId = sanitize(req.query.documentId);
   const docs = storage.getItemSync('documents');
 
-  if (!isAllowed(username, documentId, 'checking-out')) {
+  if (!isAllowed(storage.getItemSync('documents'), storage.getItemSync('delegations'), username, documentId, 'checking-out')) {
     res.status(400).json({
       message: `You don't have checking-out permission.`
     });

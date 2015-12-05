@@ -9,7 +9,7 @@ export default function safeDelete(req, res) {
   const filename = sanitize(req.query.documentId);
 
   if (!storage.getItemSync('documents').some(doc => doc.id === filename) ||
-      !isAllowed(username, filename, 'checking-in')) {
+      !isAllowed(storage.getItemSync('documents'), storage.getItemSync('delegations'), username, filename, 'checking-in')) {
     res.status(400).json({
       message: `This file doesn't exist or you don't have checking-in permission.`
     });
