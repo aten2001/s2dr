@@ -1,5 +1,5 @@
-1. 
-$ nodejs server/index
+1.
+$ nodejs server
 Server is running at https://localhost:4433 ...
 
 2.
@@ -33,14 +33,14 @@ Document 0.txt was successfully uploaded!
 
 PROBLEM: "Provide a script for verifing the signature of the copy"
 
-3. 
+3.
 s2dr:client_0> check-out 0.txt 0_copy.txt
 Document 0.txt was saved to /home/brian/Documents/s2dr/workspaces/client_0/0_copy.txt
 s2dr:client_0> ls
 0_copy.txt
 0.txt
 
-4. 
+4.
 $ nodejs client/index
 What is your username (workspace)? client_1
 Workspace client_1 created and selected.
@@ -55,7 +55,7 @@ The document 0.txt was safely deleted!
 s2dr:client_0> check-out 0.txt 0_copy2.txt
 You don't have checking-out permission.
 
-6. 
+6.
 s2dr:client_0> touch 1.txt
 s2dr:client_0> check-in 1.txt CONFIDENTIALITY
 Document 1.txt was successfully uploaded!
@@ -71,7 +71,7 @@ Have a great day!
 
 PROBLEM: "Show where teh server copy of '1.txt' is located"
 
-7. 
+7.
 $ nodejs client/index
 What is your username (workspace)? client_0
 Workspace client_0 selected.
@@ -84,7 +84,7 @@ Document 1.txt was saved to /home/brian/Documents/s2dr/workspaces/client_0/1_cop
 
 PROBLEM: "Show where the server copy of '1.txt' and its signature are located"
 
-8. 
+8.
 PROBLEM: when both in and out are set the flag is true and only the first (in or out) is applied
 
 9.
@@ -92,4 +92,4 @@ PROBLEM:s2dr:client_2> co 1.txt 1_copy2.txt
 watch /home/brian/Documents/s2dr/workspaces/client_2/1.txt ENOENT
 
 
- 
+

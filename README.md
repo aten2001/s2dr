@@ -19,7 +19,7 @@ npm install
 
 Start server:
 ```
-node server/index
+node server
 ```
 
 Start client app:

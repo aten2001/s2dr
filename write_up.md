@@ -24,7 +24,7 @@ Our program accomplishes all of the the implementation instructions as described
 
 Start server:
 ```
-node server/index
+node server
 ```
 
 Start client app:
@@ -61,19 +61,19 @@ s2dr:USERNAME> help
 ```
 
 ## Protocol Details
-The program runs an HTTPS server with the Node.js. When the client initiates the session with the server, the server challenges the client with a certificate request during the TLS handshake. Both the client and the server have 4096 bit RSA keys that they request the CA to sign as part of their initialization. After the client have a trusted connection, they share a socket for further communication. This connection is persistent until the client terminates the connection. 
-From the socket the client can call all of the required functions. The messages appear to the server with the hostname, socket, and requested action. If the hostname and key of the client do not match during initialization, the server will reject the socket and deny access. The sever knows based off the hostname which active workspace to access as long as the socket is still valid. From this the server can access the active workspace and store or retrieve files for the client.  
-The orginal owner or delegated user has several options during the delegation call. The owner is allowed to set the propagtion flag of the file for the other users that the owner delegates access. The owner or delegated user places a max time on the delegation for checking in the algorithm. The communication of the file, client, and permission then are passed to the server. The server checks that file and client exist and that they request is valid. This  
-The server checks all request against its access control list for the file requested. The rules for delegation first check the owner of the document and then the delegation rules set on the file by the owner or delegated user. The further algorithm can be found in 'is_allowed.js'. Teh server checks teh permissions of the file to see if the the userid is in them or 'all' then checks if 'check-in', 'check-out', or 'both are present and finally checks the time to ensure that the permission is still valid. 
-   
+The program runs an HTTPS server with the Node.js. When the client initiates the session with the server, the server challenges the client with a certificate request during the TLS handshake. Both the client and the server have 4096 bit RSA keys that they request the CA to sign as part of their initialization. After the client have a trusted connection, they share a socket for further communication. This connection is persistent until the client terminates the connection.
+From the socket the client can call all of the required functions. The messages appear to the server with the hostname, socket, and requested action. If the hostname and key of the client do not match during initialization, the server will reject the socket and deny access. The sever knows based off the hostname which active workspace to access as long as the socket is still valid. From this the server can access the active workspace and store or retrieve files for the client.
+The orginal owner or delegated user has several options during the delegation call. The owner is allowed to set the propagtion flag of the file for the other users that the owner delegates access. The owner or delegated user places a max time on the delegation for checking in the algorithm. The communication of the file, client, and permission then are passed to the server. The server checks that file and client exist and that they request is valid. This
+The server checks all request against its access control list for the file requested. The rules for delegation first check the owner of the document and then the delegation rules set on the file by the owner or delegated user. The further algorithm can be found in 'is_allowed.js'. Teh server checks teh permissions of the file to see if the the userid is in them or 'all' then checks if 'check-in', 'check-out', or 'both are present and finally checks the time to ensure that the permission is still valid.
+
 
 ## Security Analysis
 
 ### Communication security
-The security of the communication between the client and server is based on the security of a 4096 bit RSA key and the use of OpenSSL. The socket communication in the client server commmunication remeainssecure tithe the signing and encrypting of the messages. There are no known attacks to this type of communication. 
+The security of the communication between the client and server is based on the security of a 4096 bit RSA key and the use of OpenSSL. The socket communication in the client server commmunication remeainssecure tithe the signing and encrypting of the messages. There are no known attacks to this type of communication.
 
-### Code security 
-Provide some review of the code or documentation on the 
+### Code security
+Provide some review of the code or documentation on the
 
 ## Contributions
 Vojtech Miksu conducted the coding and optimization of the project. His work was instrumental to accomplishing all of the goals set forth in the requirements document. He provided the configurations for the server and client as well as securing the communication between them.
