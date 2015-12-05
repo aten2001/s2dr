@@ -95,3 +95,9 @@ assert('Expired delegation but the requester is owner.', true, isAllowed(
   [{documentId: 'file1', userId: 'user1', permission: 'both', time: moment().subtract(30, 's')}],
   'user1', 'file1', 'both'
 ));
+
+assert('Delegation of checking-in to ALL and trying checking-in.', true, isAllowed(
+  [{id: 'file1', ownerId: 'user2'}],
+  [{documentId: 'file1', userId: 'ALL', permission: 'checking-in', time: moment().add(30, 's')}],
+  'user1', 'file1', 'checking-in'
+));
