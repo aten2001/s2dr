@@ -7,7 +7,7 @@ Secure Shared Data Repository for CS6238 Secure Computer Systems
 - [Npm](https://www.npmjs.com/) (v3 is required, comes usually with node.js)
 - [OpenSSL](https://www.openssl.org) (v0.9.8zg, preinstalled with OSX/Linux)
 
-Tested on:
+**Tested on:**
 - OS X El Capitan 10.11.1
 - node 4.2.0
 - npm 3.3.6
@@ -366,8 +366,6 @@ Document 1.txt was saved to /s2dr/workspaces/client_0/1_copy3.txt
 30 seconds.
 ```
 
----------------------------
-
 ```
 s2dr:client_0> delegate 1.txt client_1 30 checking-out true
 Document 1.txt was delegated to user client_1 with permission
@@ -381,8 +379,6 @@ checking-out until TIMESTAMP+30 and propagationFlag set to true!
 60, checking-out, False). The delegation timeout should
 be 60 seconds.
 ```
-
----------------------------
 
 ```
 s2dr:client_1> delegate 1.txt client_2 60 checking-out false
