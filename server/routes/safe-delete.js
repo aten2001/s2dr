@@ -22,6 +22,9 @@ export default function safeDelete(req, res) {
   } else if (file.securityFlag === 'INTEGRITY') {
     fs.unlinkSync(path.join(__dirname, '../documents', file.filename));
     fs.unlinkSync(path.join(__dirname, '../documents', file.filename + '.signature'));
+  } else if (file.securityFlag === 'BOTH') {
+    fs.unlinkSync(path.join(__dirname, '../documents', file.filename + '.aes'));
+    fs.unlinkSync(path.join(__dirname, '../documents', file.filename + '.signature'));
   } else {
     fs.unlinkSync(path.join(__dirname, '../documents', file.filename));
   }

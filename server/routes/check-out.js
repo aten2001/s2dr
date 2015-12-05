@@ -20,23 +20,23 @@ export default function checkOut(req, res) {
   const result = docs.find(doc => doc.id === documentId);
   if (result) {
     res.type(result.mimetype);
-    if (result.securityFlag === 'CONFIDENTIALITY') {
+    if (result.securityFlag === 'INTEGRITY' || result.securityFlag === 'BOTH') {
+      const filePath = path.join(__dirname, '../documents', result.filename);
+      const hashFile = parseHash(exec(`openssl dgst -sha256 ${filePath}` + (result.securityFlag === 'BOTH' ? '.aes' : '')));
+      const hashSign = parseHash(exec(`openssl rsautl -verify -inkey server/ssl/server-key.pem -keyform PEM -in ${filePath}.signature`));
+      if (hashFile !== hashSign) {
+        res.status(400).json({
+          message: `Document ${documentId} lost its integrity.`
+        });
+        return;
+      }
+    }
+    if (result.securityFlag === 'CONFIDENTIALITY' || result.securityFlag === 'BOTH') {
       exec(`openssl enc -in server/documents/${result.filename}.aes -out server/documents/${result.filename} -d -aes256 -k ${result.key}`);
       const filePath = path.join(__dirname, '../documents', result.filename);
       res.sendFile(filePath, () => {
         fs.unlinkSync(filePath);
       });
-    } else if (result.securityFlag === 'INTEGRITY') {
-      const filePath = path.join(__dirname, '../documents', result.filename);
-      const hashFile = parseHash(exec(`openssl dgst -sha256 ${filePath}`));
-      const hashSign = parseHash(exec(`openssl rsautl -verify -inkey server/ssl/server-key.pem -keyform PEM -in ${filePath}.signature`));
-      if (hashFile === hashSign) {
-        res.sendFile(filePath);
-      } else {
-        res.status(400).json({
-          message: `Document ${documentId} lost its integrity.`
-        });
-      }
     } else {
       const filePath = path.join(__dirname, '../documents', result.filename);
       res.sendFile(filePath);

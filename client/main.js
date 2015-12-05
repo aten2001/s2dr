@@ -145,7 +145,7 @@ program
     console.log('  check-out\t\tco\t\t<filename>\t\tchecks out the file from the server');
     console.log('           \t\t\t\t[newname]\t\tsaves it as [newname], optional, default is <filename>');
     console.log('  check-in\t\tci\t\t<filename>\t\tsends the file to the server');
-    console.log('          \t\t\t\t<security flag>\t\tCONFIDENTIALITY | INTEGRITY | NONE');
+    console.log('          \t\t\t\t<security flag>\t\tCONFIDENTIALITY | INTEGRITY | BOTH | NONE');
     console.log('  delegate\t\td\t\t<filename>\t\tdelegates permissions to other client');
     console.log('          \t\t\t\t<client>\t\tusername | ALL');
     console.log('          \t\t\t\t<time>\t\t\ttime(s)');

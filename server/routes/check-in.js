@@ -10,7 +10,7 @@ export default function checkIn(req, res) {
   const username = sanitize(req.socket.getPeerCertificate().subject.CN);
   let securityFlag = req.body.securityFlag;
 
-  if (securityFlag.toUpperCase() === 'UPDATE') {
+  if (securityFlag === 'UPDATE') {
     if (storage.getItemSync('documents').some(doc => doc.id === filename)) {
       securityFlag = storage.getItemSync('documents').find(doc => doc.id === filename).securityFlag;
     } else {
@@ -18,9 +18,9 @@ export default function checkIn(req, res) {
     }
   }
 
-  if (['CONFIDENTIALITY', 'INTEGRITY', 'NONE'].indexOf(securityFlag.toUpperCase()) === -1) {
+  if (['CONFIDENTIALITY', 'INTEGRITY', 'BOTH', 'NONE'].indexOf(securityFlag) === -1) {
     res.status(400).json({
-      message: `SecurityFlag can be set to CONFIDENTIALITY, INTEGRITY or NONE. Not to ${securityFlag}`
+      message: `SecurityFlag can be set to CONFIDENTIALITY, INTEGRITY, BOTH or NONE. Not to ${securityFlag}`
     });
     return;
   }
@@ -37,16 +37,17 @@ export default function checkIn(req, res) {
     return;
   }
 
-  if (securityFlag.toUpperCase() === 'INTEGRITY') {
-    exec(`openssl dgst -sha256 ${filePath} > server/documents/${req.file.filename}_hash`);
-    exec(`openssl rsautl -sign -inkey server/ssl/server-key.pem -keyform PEM -in server/documents/${req.file.filename}_hash > server/documents/${req.file.filename}${filename}.signature`);
-    exec(`rm server/documents/${req.file.filename}_hash`);
-  }
-  if (securityFlag.toUpperCase() === 'CONFIDENTIALITY') {
+  if (securityFlag === 'CONFIDENTIALITY' || securityFlag === 'BOTH') {
     exec(`openssl enc -in ${filePath} -out ${filePath}${filename}.aes -e -aes256 -k ${key}`);
     fs.unlinkSync(filePath);
   } else {
     fs.renameSync(filePath, filePath + filename);
+  }
+
+  if (securityFlag === 'INTEGRITY' || securityFlag === 'BOTH') {
+    exec(`openssl dgst -sha256 ${filePath}${filename}` + (securityFlag === 'BOTH' ? '.aes' : '') + ` > server/documents/${req.file.filename}_hash`);
+    exec(`openssl rsautl -sign -inkey server/ssl/server-key.pem -keyform PEM -in server/documents/${req.file.filename}_hash > server/documents/${req.file.filename}${filename}.signature`);
+    exec(`rm server/documents/${req.file.filename}_hash`);
   }
 
   const docs = storage.getItemSync('documents');
@@ -55,13 +56,13 @@ export default function checkIn(req, res) {
     id: filename,
     filename: req.file.filename + filename,
     ownerId: result ? result.ownerId : username,
-    securityFlag: securityFlag.toUpperCase(),
+    securityFlag: securityFlag,
     mimetype: req.file.mimetype,
-    key: securityFlag.toUpperCase() === 'CONFIDENTIALITY' ? key : ''
+    key: (securityFlag === 'CONFIDENTIALITY' || securityFlag === 'BOTH') ? key : ''
   };
 
   if (result) {
-    if (result.securityFlag === 'CONFIDENTIALITY') {
+    if (result.securityFlag === 'CONFIDENTIALITY' || result.securityFlag === 'BOTH') {
       fs.unlinkSync(path.join(__dirname, '../documents', result.filename + '.aes'));
     } else if (result.securityFlag === 'INTEGRITY') {
       fs.unlinkSync(path.join(__dirname, '../documents', result.filename));

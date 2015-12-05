@@ -11,8 +11,8 @@ export default function checkIn(activeWorkspace, hostname, filename, securityFla
     return Bluebird.resolve();
   }
 
-  if (['CONFIDENTIALITY', 'INTEGRITY', 'NONE', 'UPDATE'].indexOf(securityFlag.toUpperCase()) === -1) {
-    printError(`SecurityFlag can be set to CONFIDENTIALITY, INTEGRITY or NONE. Not to ${securityFlag}.`);
+  if (['CONFIDENTIALITY', 'INTEGRITY', 'NONE', 'BOTH', 'UPDATE'].indexOf(securityFlag.toUpperCase()) === -1) {
+    printError(`SecurityFlag can be set to CONFIDENTIALITY, INTEGRITY, BOTH or NONE. Not to ${securityFlag}.`);
     return Bluebird.resolve();
   }
 
