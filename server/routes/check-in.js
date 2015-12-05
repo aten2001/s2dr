@@ -54,7 +54,7 @@ export default function checkIn(req, res) {
   const newFile = {
     id: filename,
     filename: req.file.filename + filename,
-    ownerId: username,
+    ownerId: result ? result.ownerId : username,
     securityFlag: securityFlag.toUpperCase(),
     mimetype: req.file.mimetype,
     key: securityFlag.toUpperCase() === 'CONFIDENTIALITY' ? key : ''
