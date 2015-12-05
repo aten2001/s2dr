@@ -18,12 +18,8 @@ export default function checkOut(activeWorkspace, hostname, filename, newname, u
     '/document',
     {documentId: filename}
   )
-  .then((data) => {
-    write(filePath, data.body, 'binary');
-    if (data.statusCode === 200) {
-      updateWatchList(filename);
-    }
-  })
+  .then((data) => write(filePath, data.body, 'binary'))
+  .then(() => updateWatchList(newname))
   .then(() => printInfo(`Document ${filename} was saved to ${filePath}`))
   .catch((err) => {
     printError(err.message);
